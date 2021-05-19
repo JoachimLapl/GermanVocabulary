@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+        }
+
+        line {
+            stroke: #000;
+            stroke-width: .5;
+        }
+
+        circle {
+            fill: #f00;
+        }
+    </style>
+</head>
+
+<body>
+    <span id=answer></span>
+    <script>
+        const $ = s => document.querySelector(s);
+        const answer = $('#answer');
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                answer.innerHTML = this.responseText;
+            }
+        };
+        xmlhttp.open("GET", "test.txt", true);
+        xmlhttp.send();
+    </script>
+</body>
+
+</html>
