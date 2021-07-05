@@ -2,27 +2,535 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
     <style>
-        html, body{
+        html,
+        body {
             height: 100%;
             width: 100%;
             margin: 0;
-        }
-        header{
-            height: 25vh;
-            background: #f00;
-            color: #fff;
-            box-shadow: 0px 2px 5px #000;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 300%;
+        }
+
+        textarea {
+            width: 100%;
+            outline: none !important;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        #buttonwrapper {
+            width: 100%;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
     </style>
 </head>
 
 <body>
-    <header>HEADER</header>
+    <div id="wrapper">
+        <div id="question"></div>
+        <textarea placeholder="write here..."></textarea>
+        <div id="buttonwrapper">
+            <button>try</button>
+            <button>check</button>
+            <button>resolve</button>
+            <button>trash</button>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const questiondiv = $('#question'), resultdiv = $('#result'), userdiv = $('textarea'), [tryEl, checkEl, resolveEl, trashEl] = $('#buttonwrapper').children;
+        Object.defineProperties(this, {
+            userresult: { get: function () { return userdiv.value }, set: function (s) { userdiv.value = s } },
+            question: { set: function (s) { questiondiv.innerHTML = s } },
+            result: { set: function (s) { resultdiv.innerHTML = s } },
+            usercolor: { set: function (s) { userdiv.style.borderColor = s } },
+        });
+        const questions = [
+            ['hallo', 'bonjour'],
+            ['der Pilz(-e)', 'le champignon'],
+            ['jn ärgern', 'embêter qn'],
+            ['der Spiegel', 'le mirroir'],
+            ['ziehen', 'tirer'],
+            ['anziehen', 'habiller'],
+            ['ausziehen', 'déshabiller'],
+            ['umziehen', 'déménager'],
+            ['die Beziehung', 'la relation'],
+            ['sich gut/schlecht verstehen', 'bien/mal s\'entendre'],
+            ['der Text(-e)', 'le texte'],
+            ['teilen', 'partager'],
+            ['ähnlich sein', 'être ressemblant'],
+            ['schlimm', 'grave'],
+            ['die Strafe(-n)', 'la punition'],
+            ['recht haben', 'avoir raison'],
+            ['einverstanden sein', 'être d\'accord'],
+            ['ich denke, dass...', 'je pense que...'],
+            ['ich finde, dass...', 'je trouve que...'],
+            ['ich glaube, dass...', 'je crois que...'],
+            [['ich bin einverstanden mit dir', 'ich stimme dir zu'], 'je suis d\'accord avec toi'],
+            ['ich bin der Meinung, dass...', 'je suis d\'avis que...'],
+            ['verstehen', 'comprendre'],
+            ['das kommt darauf an', 'cela dépend'],
+            ['streng', 'sévère'],
+            ['gefährlich', 'dangereux'],
+            ['jn schützen', 'protéger qn'],
+            ['Dummkeiten machen', 'faire des bêtises'],
+            ['verantwortlich für jn sein', 'être responsable de qn'],
+            ['erwachsen sein', 'être adulte'],
+            ['in die Oper gehen', 'aller à l\'Opéra'],
+            ['ins Theater gehen', 'aller au théâtre'],
+            ['ins Kino gehen', 'aller au cinéma'],
+            ['der Freund(-e)', 'l\'ami'],
+            ['der Kumpel(-s)', 'le pote'],
+            ['der Vergnügungspark(-s)', 'le parc d\'attraction'],
+            ['der Blumenkranz(¨-e)', 'la couronne de fleurs'],
+            ['der Gürtel(-n)', 'la ceinture'],
+            ['der Modeschöpfer', 'le créateur de mode'],
+            ['der Jugendliche(-n)', 'l\'adolescent'],
+            ['die Brille', 'les lunettes'],
+            ['die Sehbrille', 'les lunettes de vue'],
+            ['die Sonnenbrille', 'les lunettes de soleil'],
+            ['die Freundin(-en)', 'l\'amie'],
+            [['die Kleidung', 'die Kleidungsstücke'], ['les vêtements', 'les habils']],
+            ['die Klamotten', 'les fringues'],
+            ['die Jacke', 'la veste'],
+            ['die Persönlichkeit', 'la personnalité'],
+            ['die Jugend', 'la jeunesse'],
+            ['die Sneakers', 'les baskets'],
+            [['das Wellenreiten', 'das Surfen'], 'la planche de surf'],
+            [['das Dirndl', 'das rraditionelle bayernische Kmeid'], 'la robe traditionelle bavaroise'],
+            ['das T-Shirt', 'le T-shirt'],
+            ['Schlittschuh laufen', 'faire du patin à glace'],
+            ['mit jm ab/hängen', ['traîner avec qn', 'passer du temps avec qn']],
+            ['lachen', 'rire'],
+            [['kicken', 'Fußball spielen'], 'faire du foot'],
+            [['zocken', 'Videospiele spielen'], 'jouer aux jeux vidéos'],
+            [['Rad fahren', 'Fahrrad fahren'], 'faire du vélo'],
+            ['weg/gehen', 'sortir'],
+            ['die Freizeit','le temps libre'],
+            ['in der Freizeit', 'pendant son temps libre'],
+            ['sich mit jm treffen', 'rencontrer qn'],
+            ['angeln', 'pêcher'],
+            ['grillen', 'faire du BBQ'],
+            ['trainieren', 's\'entraîner'],
+            ['zusammensitzen', 'être ensemble'],
+            ['Synchronschwimmen treiben', 'faire de la syncro'],
+            ['Drachen steigen lassen', 'faire du cerf-volant'],
+            ['feiern', ['faire la fête', 'fêter']],
+            ['entspannend', 'relaxant'],
+            ['lustig', ['amusant', 'drôle']],
+            ['verrückt', 'fou'],
+            [['super', 'toll', 'geil'], ['super', 'génial']],
+            ['den Alltagsstress vergessen', 'oublier le stress du quotidien'],
+            ['in Trend liegen', 'être au goût du jour'],
+            ['angesagt sein', 'être tendance'],
+            ['handgemacht', 'fait main'],
+            ['breit', 'large'],
+            ['kurz', 'court'],
+            ['billig', ['bon marché', 'pas cher']],
+            ['tuer', 'cher'],
+            ['seinen eingenen Stil finden', 'trouver son propre style'],
+            ['etw bedeuten', 'signifier qc'],
+            ['etw tragen', 'porter qc'],
+            ['etw wider/spiegeln', 'refléter qc'],
+            ['eine Vorliebe aus/drücken', 'exprimer une préférence'],
+            ['jung sein', 'être jeune'],
+            ['alt sein', 'être agé'],
+            ['elegant', 'élégant'],
+            ['schick', 'chic'],
+            ['zeitlos', 'hors du temps'],
+            ['bequem', 'confortable'],
+            [['"in" sein', 'angesagt sein', 'trendy sein', 'der Renner sein'], ['être à la mode', 'être tendance']],
+            ['seine Personlichkeit ausdrücken', 'exprimer sa personnalité'],
+            ['der Laptop(-s)', ['l\'ordinateur portable', 'le PC']],
+            ['der Computer(-)', 'l\'ordinateur'],
+            ['der Follower(-s)', 'le follower'],
+            ['der Fan(-s)', 'le fan'],
+            ['die Presse', 'la presse'],
+            ['die Zeitung(-en)', 'le journal'],
+            ['die Zeitschrift(-en)', 'le magasine'],
+            ['die Werbung(-en)', 'la publicité'],
+            ['die Aufmerksamkeit(-en)', 'l\'attention'],
+            ['die Handlung(-en)', 'l\'action'],
+            [['das Fernsehen', 'der Fernsehapparat'], ['la télévision', 'la télé']],
+            ['das Radio(-s)', 'la radio'],
+            ['das Internet', 'Internet'],
+            ['das Handy(-s)', 'le téléphone portable'],
+            ['das Bedürfnis(-se)', 'le besoin'],
+            ['das Interesse(-n)', 'l\'intérêt'],
+            ['das Sozial(-en) Netzwerk(-e)', 'le réseau social'],
+            ['oft', 'souvent'],
+            ['regemäßig', 'régulièrement'],
+            ['manchmal', 'parfois'],
+            ['selten', 'rarement'],
+            ['Werbung machen', 'faire la publicité'],
+            ['für etw werben', 'faire de la promotion pour qc'],
+            ['die Aufmerksamkeit auf etw zeihen', 'attirer l\'attention sur qc'],
+            ['jn für etw interessieren', 'intéresser qn pour qc'],
+            ['das Interesse/Bedürfnis wecken', 'éveiller l\'intérêt/le besoin'],
+            ['handeln', 'agir'],
+            ['Geld verdienen', 'gagner de l\'argent'],
+            ['diePrivatsphäre verlieren', ['perdre la sphère', 'perdre la vie privée']],
+            ['abhängig', 'dépendant'],
+            ['unabhängig', 'indépendant'],
+            ['das Buch(¨-er)', 'le livre'],
+            ['der Satz(¨-e)', 'la phrase'],
+            ['lachen', 'rire'],
+            ['sagen', 'dire'],
+            ['machen', 'faire'],
+            ['reisen', 'voyager'],
+            ['besuchen', 'rendre visite'],
+            ['besichtigen', 'visiter'],
+            ['lernen', 'apprendre'],
+            ['verlernen', 'désapprendre'],
+            ['arbeiten', 'travailler'],
+            ['ein/kaufen', 'faire les courses'],
+            ['spielen', 'jouer'],
+            ['lesen', 'lire'],
+            ['gehen', 'aller'],
+            ['laufen', 'courrir'],
+            ['essen', 'manger'],
+            ['trinken', 'boire'],
+            ['schreiben', 'écrire'],
+            ['schlafen', 'dormir'],
+            ['stehen', 'être debout'],
+            ['sitzen', 's\'asseoir'],
+            [['nutzen', 'benutzen'], 'avoir qc'],
+            ['die Nuss', 'la noix'],
+            ['die Hand(¨-e)', 'la main'],
+            ['Hosentesche', 'la poche de pantalon'],
+            ['nutzlich', 'utile'],
+            ['nutzlos', 'inutile'],
+            ['auftauchen', 'apparaître'],
+            ['etw loswerden', 'se débarrasser de qc'],
+            ['verboten sein etw zu tun', 'il est interdit de faire qc'],
+            ['beschädigt', 'endommagé'],
+            ['der Schläger(-)', 'la raquette'],
+            ['der Ball(¨-e)', ['le ballon', 'la balle']],
+            ['der Degen', 'l\'épée'],
+            ['der Helm(-e)', 'le casque'],
+            [['der Federball', 'das Badminton'], 'le badminton'],
+            ['der Schuh(-e)', 'la chaussure'],
+            ['der Ski(-er)', 'le ski'],
+            ['der Inliner(-)', 'le roller'],
+            ['der Kegel(-)', 'la quiller'],
+            ['der Hochsprung', 'le saut en hauteur'],
+            ['der Weitsprung', 'le saut en longueur'],
+            ['der Sport', 'le sport'],
+            ['der Würfel(-)', 'le dé'],
+            ['der Fuß(¨-e)', 'le pied'],
+            ['der Strand(¨-e)', 'la plae'],
+            ['der Regen', 'la pluie'],
+            ['der Regenschirm(-e)', 'le parapluie'],
+            ['der Verein(-e)', 'l\'association'],
+            ['das Tischtennis', ['le ping-pong', 'le tenis de table']],
+            ['das Schwimmbad(¨-er)', 'la piscine'],
+            ['das Ballett', 'la dance classique'],
+            ['das Hockey', 'le hockey'],
+            ['das Judo', 'le judo'],
+            ['das Karate', 'le karaté'],
+            ['das Boot(-e)', 'le bateau'],
+            ['das Kayak(-s)', 'le kayak'],
+            ['das Kanu(-s)', 'le canoë'],
+            ['das Wasser', 'l\'eau'],
+            ['das Geld(-er)', 'l\'argent'],
+            ['das Pferd(-e)', 'le cheval'],
+            ['das Team(-s)', 'l\'équipe'],
+            ['das Tor(-e)', 'le but'],
+            ['das Schach', 'les échecs'],
+            ['die Sportart(-en)', 'la discipline sportive'],
+            ['die Kälte', 'le froid'],
+            ['schwimmen', 'nager'],
+            ['tanzen', 'dancer'],
+            ['boxen', 'faire de la boxe'],
+            ['kämpfen', 'combattre'],
+            [['kegeln', 'bowlen'], 'faire du bowling'],
+            ['spazieren gehen', 'se promener'],
+            ['wandern', 'faire de la randonnée'],
+            ['gewinnen', 'gagner'],
+            ['klettern', 'grimper'],
+            ['sich bewegen', 'se bouger'],
+            [['laufen', 'joggen', 'rennen'], 'courrir'],
+            [['die Wand(¨-e)', 'der Mauer'], 'le mur'],
+            ['die Decke(-n)', ['le plafond', 'la couverture']],
+            ['die Säule(-n)', 'le pilier'],
+            ['die Bank(¨-e)', 'le banc'],
+            ['die Kerze', 'la bougie'],
+            ['die Ratte(-n)', 'le rat'],
+            ['der Schwanz(¨-e)', 'la queue'],
+            ['der Deckel(-)', 'le couvercle'],
+            ['die Truhe(-n)', 'le coffre'],
+            ['der Adventskranz', 'la courrone de l\'avent'],
+            ['der Lebkuchen', 'le pain d\'épices'],
+            ['der Nikolaus', 'St Nicolas'],
+            ['der Weihnachtsmann(¨-er)', 'le père Noël'],
+            ['der Dezember', 'décembre'],
+            ['die Glocke(-n)', 'la cloche'],
+            ['der Schneemann(¨-er)', 'le bonhomme de neige'],
+            ['das Weihnachtslied(-er)', 'le chant de noël'],
+            ['der Winter', 'l\'hiver'],
+            ['der Stern(-e)', 'l\'étoile'],
+            ['der Engel(-)', 'l\'ange'],
+            ['singen', 'chanter'],
+            ['schenken', 'offrir'],
+            ['basteln', 'bricoler'],
+            ['einpacken', 'emballer'],
+            ['die Freude(-n)', 'la joie'],
+            ['das Geschenk(-e)', 'le cadeau'],
+            ['das Packet(-e)', 'le paquet'],
+            ['der Weihnachtsbaum(¨-e)', 'le sapin de noël'],
+            ['das Weihnachtsplätzchen', 'le biscuit de noël'],
+            ['die CD(-s)', 'le CD'],
+            ['die Reise(-n)', 'le voyage'],
+            ['die Kette(-n)', 'le collier'],
+            ['die Uhr(-en)', 'la montre'],
+            ['das Armband(¨-er)', 'le bracelet'],
+            ['das Einhorn(¨-er)', 'la licorne'],
+            ['der Pullover(-)', ['le pullover', 'le pull']],
+            ['der Stift(-e)', 'le stylo'],
+            ['der Schmuck(-)', 'le bijou'],
+            ['der Gutschein(-e)', 'le bon'],
+            ['der Kopfhörer(-)', 'le casque'],
+            ['das Retzel', 'le casse-tête'],
+            ['das Kissen(-)', 'le coussin'],
+            ['das Bild(-er)', 'l\'image'],
+            ['das Poster(-)', 'le poster'],
+            ['das Bücherregal(-e)', 'la bibliothèque'],
+            ['das Fenster(-)', 'la fenêtre'],
+            ['das Bett(-en)', 'le lit'],
+            ['das Versteck(-e)', 'la cachette'],
+            ['das Sofa(-s)', 'le sofa'],
+            ['das Washbeken(-)', 'le lavabo'],
+            ['das Geschirr(-e)', 'la vaisselle'],
+            ['das Dach(¨-er)', 'le toit'],
+            ['das Haus(¨-er)', 'la maison'],
+            ['der Baum(¨-e)', 'l\'arbre'],
+            ['der Fels(-en)', 'le rocher'],
+            ['der Garten(¨-)', 'le jardin'],
+            ['der Teddybär(-en)','l\'ours en peluche'],
+            ['der Schreibtisch(-e)','le bureau'],
+            ['der Stuhl(¨-e)','la chaise'],
+            ['der Nachttisch(-e)','la table de nuit'],
+            ['der Teppish(-e)','le tapis'],
+            ['der Schrank(¨-e)','l\'armoire'],
+            ['der Sessel(-)','le fauteuil'],
+            ['der Liebesbrief(-e)','la lettre d\'amour'],
+            ['die Tür(-en)','la porte'],
+            ['die Lampe(-n)','la lampe'],
+            ['die Kommode(-n)','la commode'],
+            ['die Badewanne','la baignoire'],
+            ['die Wohnung','l\'appartement'],
+            ['aufräumen','ranger'],
+            ['kochen','cuisiner'],
+            ['duschen',['se doucher','prendre une douche']],
+            ['sich ausruhen','se reposer'],
+            ['fernsehen','regarder la télé'],
+            ['das Geschirr spülen','laver la vaisselle'],
+            ['hängen','pendre'],
+            ['die Hausordnung','le règlement intérieur'],
+            ['liegen','coucher'],
+            ['etw in ... verstecken','cacher qc dans...'],
+            ['was ist passiert','que s\'est-il passé'],
+            ['einfach','facile'],
+            ['scher','difficile'],
+            ['geheim','secret'],
+            ['reiten',['faire de cheval','faire de l\'équitation']],
+            ['fechten','faire de l\'escrime'],
+            ['ringen','lutter'],
+            ['der Inliner(-)','le roller'],
+            ['turnen','faire de la gymnastique'],
+            [['voran','rücken'],'avancer'],
+            ['würfeln','lancer le dé'],
+            ['draußen',['dehors','à l\'extérieur']],
+            ['mir ist kalt','j\'ai froid'],
+            ['scwitzen','transpirer'],
+            ['rudern',['ramer','faire de l\'aviron']],
+            ['musikalisch sein','être musicien'],
+            ['ein Tor schießen','marquer un but'],
+            ['die Sehenswürdikeit(-en)','l\'attraction touristique'],
+            ['der Dom(-e)','la cathédrale'],
+            ['der Hafen(¨-)','le port'],
+            ['der Fluhafen(¨-)','l\'aéroport'],
+            ['der See(-n)','le lac'],
+            ['die See(-n)','la mer'],
+            ['die Festung(-en)','la forteresse'],
+            ['die Ferien','les vacances'],
+            ['entdecken','découvrir'],
+            ['an der Grenze liegen','se situer à la frotière'],
+            ['die Insel(-n)','l\'île'],
+            ['das Viertel(-)','le quartier'],
+            ['das Wahrzeichen(-)','un monument très connu'],
+            ['das Schloss(¨-er)','le château'],
+            ['das Riesenrad(¨-er)','la grande roue'],
+            ['der Berg(-en)',['le sommet', 'la montagne']],
+            ['das Gebirge','la chaîne de montagne'],
+            ['das Ferienlager(-)','la colonie de vacances'],
+            ['die Landschaft(-en)','le paysage'],
+            ['auf dem Land sein','être à la campagne'],
+            ['in den Bergen sein','être à la montagne'],
+            ['angenehm','agréable'],
+            ['erholsam','reposant'],
+            ['faulenzen','paresser'],
+            ['zelten','camper'],
+            ['jm gefallen','plaire à qn'],
+            ['das gefällt mir gut','ça me plaît bien'],
+            ['Zeit verbringen','passer du temps'],
+            ['ich habe Zeit verbracht','j\'ai passé du temps'],
+            ['mit(+D)','avec'],
+            ['das Verkehrsmittel(-)','le moyen de transport'],
+            ['zu Fu B  gehen','aller à pied'],
+            ['ich bin zu Fu B gegangen','je suis allé à pied'],
+            ['mit dem Bus fahren','aller en bus'],
+            ['er ist mit dem Bus gefahren','il est allé en bus'],
+            ['mit dem Auto fahren','aller en voiture'],
+            ['mit dem Fahrrad fahren','aller à vélo'],
+            ['mit dem Zug fahren','aller en train'],
+            ['der Zug(¨-e)','le train'],
+            ['mit dem Wihnwagen fahren','aller en caravane'],
+            ['fliegen',['voler', 'prendre l\'avion']],
+            ['du bist nach Paris geflogen','tu es allé à Paris en avion'],
+            ['die Wissebschaft(-en)','la science'],
+            ['die Wirtschaft(-en)','l\'économie'],
+            ['langweilig','ennuyeux'],
+            ['sich über etw informieren',['s\'informer sur qc','s\'informer via qc']],
+            ['sich für etw interessieren','s\'intéresser à qc'],
+            ['besonders','particulièrement'],
+            ['haupsächlich','principalement'],
+            ['das Profil(-e)','le profil'],
+            ['am meisten','le plus'],
+            [['generell','in Allgemeinen'],'en général'],
+            ['persönlich','personnel'],
+            ['aufpassen','faire attention'],
+            ['in einer Beziehung sein','être dans une relation'],
+            ['anschauen','regarder'],
+            ['ins Internet stellen','publier sur Internet'],
+            ['die Daten','les données'],
+            ['wichtig','important'],
+            ['etw auswählen','choisir qc'],
+            ['der Sender(-)','la chaîne'],
+            ['die Sendung(-en)','l\'émission'],
+            ['etw empfangen','capter qc'],
+            ['die Nachrichten','les informations'],
+            ['etw senden','diffuser qc'],
+            ['die Einbahnstra B e(-n)','la rue à sens unique'],
+            ['der Empfänger(-)','le destinataire'],
+            ['nehmen, was kommt','prendre ce qui vient'],
+            ['auch wenn','même si'],
+            ['ganz anders','autrement'],
+            ['funktionieren','fonctionner'],
+            [['das Netz(-e)','das Netzwerk(-e)'],'le réseau'],
+            ['unzählig','innombrable'],
+            ['die Verknüpfung(-en)',['le lien', 'la laison', 'la concaténation']],
+            ['mit einander verbunden','être reliés les uns aux autres'],
+            ['mitmachen','participer'],
+            ['weltweit','mondial'],
+            ['in alle Richtungen','dans toutes les directions'],
+            ['gleichzeitig','en même temps'],
+            ['nicht nur..., sondern auch','non seulement..., mais aussi'],
+            ['die Aufnahme(-n)','l\'enregistrement'],
+            ['woanders sein','être ailleurs'],
+            ['grenzenlose Möglichkeiten','des possibilités illimitées'],
+            ['von etw loskommen','se défaire de qc'],
+            [['erstellen','kreieren'],'créer'],
+            ['der Beruf(-e)','le métier'],
+            ['das Praktikum(-a)','le stage'],
+            ['der Mensch(-en)','l\'être humain'],
+            ['der Wunsch(¨-e)','le souhait'],
+            ['die Arbeit(-en)','le travail'],
+            ['der Koch(¨-e), die Köchin(-nen)','le cuisinier, la cuisinière'],
+            ['der Arzt(¨-e), die Ärztin(-nen)','le médecin'],
+            ['der Lehrer(-), die Lehrerin(-nen)','l\'enseignant, l\'enseignante'],
+            ['der Architekt(-en), die Architektin(-nen)','l\'architecte'],
+            ['der Bäcker(-), die B¨ckerin(-nen)','le boulanger, la boulangère'],
+            ['der Feuerwehrmann(¨-er), die Feuerwehrfrau(-en)','le pompier'],
+            ['der Bauarbeiter(-), die Bauarbeiterin(-nen)','l\'ouvrier, l\'ouvrière'],
+            ['der Apotheker(-), die Apothekerin(-nen)','le pharmacien, la pharmacienne'],
+            ['der Optiker(-), die Optikerin(-nen)','l\'opticien, l\'opticienne'],
+            ['der Maler(-), die Malerin(-nen)','le peintre'],
+            ['der Friseur(-e), die Friseurin(-nen)','le coiffeur, la coiffeuse'],
+            ['der Kaufmann(¨-er), die Kauffrau(-en)','le commercial, la commerciale'],
+            ['der Fachmann(¨-er), die Fachfrau(-en)','l\'expert, l\'experte'],
+            ['der Polizist(-en), die Polizistin(-nen)','le policier, la policière'],
+            ['der Forscher(-), die Forscherin(-nen)','le chercheur, la chercheuse'],
+            ['der Tierarzt(¨-e), die Tierärztin(-nen)','le vétérinaire'],
+            ['der Krankenpfleger(-), die Krankenschwester(-n)','l\'infirmier, l\'infirmière'],
+            ['der Sänger(-), die Sängerin(-nen)','le chanteur, la chanteuse'],
+            ['der Rechtsanwalt(¨-e), die Rechtsanwaltin(-nen)','l\'avocat, l\'avocate'],
+            ['der Informatiker(-), die Informatikerin(-nen)','l\'informaticien, l\'informaticienne'],
+            ['schützen','protéger'],
+            ['bauen','construire'],
+            ['der Gegenstand(¨-e)','l\'objet'],
+            ['planen',['organiser','projeter']],
+            ['das Ding(-e)','la chose'],
+            ['engagiert',['engagé','dévoué']],
+            ['pünktlich','ponctuel'],
+            ['geduldig','patient'],
+            ['ordentlich',['ordonné','appliqué']],
+            ['das Zeil(-e)','l\'objectif'],
+            ['erreichen','atteindre']
+        ];
+        const trashBin = [];
+        var current, timeoutFunction;
+
+        function Question() {
+            this[2] = Math.floor(Math.random() * questions.length);
+            const n = this.n = Math.ceil(Math.random() * 2) % 2;
+            var ques = questions[this[2]][(n + 1) % 2];
+            if (Array.isArray(ques)) {
+                ques = ques[Math.floor(Math.random() * ques.length)];
+            };
+            this[0] = `${['Traduire ', ''][n]}<b>${ques}</b> ${['en allemand', 'ins Französische übersetzen'][n]}.`;
+            this[1] = questions[this[2]][n];
+            this.remove = function () {
+                trashBin.push(questions.splice(this[2], 1));
+            };
+        };
+        function init() {
+            current = new Question();
+            question = current[0];
+            usercolor = 'black';
+            userresult = '';
+            result = '';
+            timeoutFunction && clearTimeout(timeoutFunction);
+        };
+        init();
+        function end() {
+            result = current[1].join?.(', ') || current[1];
+            timeoutFunction && clearTimeout(timeoutFunction);
+            timeoutFunction = setTimeout(init, 5e3);
+        };
+        const right = (input, checkWith) => Array.isArray(checkWith) ? checkWith.includes(input) : input === checkWith;
+        tryEl.onclick = tryFunc = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]) && (end(), 1))];
+        };
+        checkEl.onclick = check = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]))];
+            end();
+        };
+        resolveEl.onclick = resolve = function () {
+            result = current[1];
+            end();
+        };
+        trashEl.onclick = trash = function () {
+            current.remove();
+            init();
+        };
+        onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                tryFunc();
+            };
+        };
+    </script>
 </body>
 
 </html>
