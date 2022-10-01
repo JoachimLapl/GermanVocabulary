@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        textarea {
+            width: 100%;
+            outline: none !important;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        #buttonwrapper {
+            width: 100%;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="question"></div>
+        <textarea placeholder="write here..."></textarea>
+        <div id="buttonwrapper">
+            <button>try</button>
+            <button>check</button>
+            <button>resolve</button>
+            <button>trash</button>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const questiondiv = $('#question'), resultdiv = $('#result'), userdiv = $('textarea'), [tryEl, checkEl, resolveEl, trashEl] = $('#buttonwrapper').children;
+        Object.defineProperties(this, {
+            userresult: { get: function () { return userdiv.value }, set: function (s) { userdiv.value = s } },
+            question: { set: function (s) { questiondiv.innerHTML = s } },
+            result: { set: function (s) { resultdiv.innerHTML = s } },
+            usercolor: { set: function (s) { userdiv.style.borderColor = s } },
+        });
+        const questions = [
+            ['liegen', 'se situer'],
+            ['in der Mitte von', 'au milieu de'],
+            ['berühmt', 'célèbre'],
+            ['(welt)bekannt', 'connu (dans le monde entier)'],
+            ['der Ausländer(-)', 'l\'étranger'],
+            ['ausländich', 'éranger'],
+            ['aus dem Ausland kommen', 'venir de l\étranger'],
+            ['kosmopilitisch', 'cosmopolite'],
+            [['offen','aufgeschlossen'], ['ouvert','tolérant']],
+            ['attraktiv', 'attirant'],
+            ['sich befinden', 'se trouver'],
+            ['im Herzen von', 'au coeur de'],
+            ['an der Kreuzung von', 'au croisement de'],
+            ['die Weltstadt(¨-e)', 'la ville-monde'],
+            ['der Anteil', 'la part'],
+            ['jn an/ziehen', 'attirer qn'],
+            ['sich nieder/lassen', 's\'installer'],
+            [['das Viertel(-)','derStadtteil(-e)', 'le quartier'],
+            ['die Innenstadt', 'le centre-cille'],
+            ['die Bank(-en)', 'la banque'],
+            ['die Börse', 'la bourse'],
+            [['die Hochschule(-n)','die Universität(-en)'], 'l\'université'],
+            ['der Flughafen(¨)', 'l\'aéroport'],
+            ['der See(-n)', 'le lac'],
+            ['der Fluss(¨-e)', ['le fleuve','la rivière']],
+            ['angenehm', 'agréable'],
+            ['stressig', 'stressant'],
+            ['jm gefallen', 'plaire à qn'],
+            ['der Stadtkrei(-e)', 'l\'arrondissement'],
+            ['der Finanzplatz(¨-e)', 'la place financière'],
+            ['die öffentlichen Verkehrsmittel', 'les transports publics'],
+            ['sauber', 'propre'],
+            ['schmutzig', 'salle'],
+            ['sicher', 'sûr'],
+            ['gefährlich', 'dangereux'],
+            ['lebendig', 'vivant'],
+            ['langweilig', 'ennuyeux'],
+            ['der Wohlstand', 'la prospérité'],
+            ['wohlhabend sien', ' être aisé'],
+            ['der Dialekt(-e)', 'le dialecte'],
+            ['die Muttersprache', 'la langue maternelle'],
+            ['die Fremdsprache(-n)', 'la langue étrangère'],
+            [['multikulturell','multikulti'],'multiculturel'],
+            ['die Herkunft', 'l\'origine'],
+            ['deutschsprachig', 'germanophone'],
+            [['sich zu Hause fühlen','heimisch fühlen'], 'se sentir chez soi'],
+            ['fremd fühlen', 'se sentir étranger'],
+            ['einheimisch', 'local'],
+            ['der Einheimische(-n,-n)', ['l\'habitant','le local','l\'autochtone']],
+            ['aus ... (+D) stammen', 'être originaire de ...'],
+            ['sich ein/leben', ['s\'adapter','s\intégrer']],
+            ['Teil der Gesellschaft sein', 'faire partie de la société'],
+            ['mit etw./jm verbunden sein', 'être relié à qc/qn'],
+            ['einer Gemeinde an/gehören', 'faire partie d\'une communauté'],
+            ['eine Tradition an/nehmen', 'adopter une tradition'],
+            ['zurückhaltend', 'réservé'],
+            ['das Missverständnis(-se)', 'le malentendu'],
+            ['sich verlegen fühlen', 'se sentir embarrassé']
+        ];
+        const trashBin = [];
+        var current, timeoutFunction;
+
+        function Question() {
+            this[2] = Math.floor(Math.random() * questions.length);
+            const n = this.n = Math.ceil(Math.random() * 2) % 2;
+            var ques = questions[this[2]][(n + 1) % 2];
+            if (Array.isArray(ques)) {
+                ques = ques[Math.floor(Math.random() * ques.length)];
+            };
+            this[0] = `${['Traduire ', ''][n]}<b>${ques}</b> ${['en allemand', 'ins Französische übersetzen'][n]}.`;
+            this[1] = questions[this[2]][n];
+            this.remove = function () {
+                trashBin.push(questions.splice(this[2], 1));
+            };
+        };
+        function init() {
+            current = new Question();
+            question = current[0];
+            usercolor = 'black';
+            userresult = '';
+            result = '';
+            timeoutFunction && clearTimeout(timeoutFunction);
+        };
+        init();
+        function end() {
+            result = current[1].join?.(', ') || current[1];
+            timeoutFunction && clearTimeout(timeoutFunction);
+            timeoutFunction = setTimeout(init, 5e3);
+        };
+        const right = (input, checkWith) => Array.isArray(checkWith) ? checkWith.includes(input) : input === checkWith;
+        tryEl.onclick = tryFunc = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]) && (end(), 1))];
+        };
+        checkEl.onclick = check = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]))];
+            end();
+        };
+        resolveEl.onclick = resolve = function () {
+            result = current[1];
+            end();
+        };
+        trashEl.onclick = trash = function () {
+            current.remove();
+            init();
+        };
+        onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                tryFunc();
+            };
+        };
+    </script>
+</body>
+
+</html>
