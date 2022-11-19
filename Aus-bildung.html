@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        textarea {
+            width: 100%;
+            outline: none !important;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        #buttonwrapper {
+            width: 100%;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="question"></div>
+        <textarea placeholder="write here..."></textarea>
+        <div id="buttonwrapper">
+            <button>try</button>
+            <button>check</button>
+            <button>resolve</button>
+            <button>trash</button>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const questiondiv = $('#question'), resultdiv = $('#result'), userdiv = $('textarea'), [tryEl, checkEl, resolveEl, trashEl] = $('#buttonwrapper').children;
+        Object.defineProperties(this, {
+            userresult: { get: function () { return userdiv.value }, set: function (s) { userdiv.value = s } },
+            question: { set: function (s) { questiondiv.innerHTML = s } },
+            result: { set: function (s) { resultdiv.innerHTML = s } },
+            usercolor: { set: function (s) { userdiv.style.borderColor = s } },
+        });
+        const questions = [
+            ["das Bildungswesen", "le système éducatif"],
+            ["die Schulpflicht", "la scolarité obligatoire"],
+            ["eine Schule besuchen", "fréquenter une école"],
+            ["der Unterricht", "l'enseignement"],
+            ["der Kindergarten", "le jardin d'enfants"],
+            ["die Grundschule", "l'école élémentaire"],
+            ["die Orientierungsstufe(n)", "le cycle d'orientation"],
+            ["die Hauptschule(n)", "l'école secondaire menant à la fin des étude obligatoire"],
+            ["die Realschule(n)", "l'école secondaire menant à un second cycle technique ou professionnel"],
+            ["die Fachoberschule(n)", "le lycée technique"],
+            ["das Gymnasium(ien)", "le lycée"],
+            ["das mathematischwissenschaftliche Gymnasium", "le lycée à dominante mathématique"],
+            ["die naturewissenschaftliche Gymnasium", "le lycée à dominante scientifique"],
+            ["das musische Gymnasium", "le lycée à dominante littéraire"],
+            ["die Gesamtschule(n)", "l'école unique"],
+            ["zum Abitur führen", "conduire au baccalauréat"],
+            ["die Note(n)", "la note"],
+            ["die Sonderschule(n)", "l'école d'éducation spécial pour les enfants en difficulté scolaire"],
+            ["der Hauptschulabschluss", "le diplôme de fin d'étude secondaire &quot;de base&quot;"],
+            ["der Realschulabschluss", "le diplôme de fin d'étude secondaire intermédiaire"],
+            ["das Abitur", "le baccalauréat"],
+            ["das Ergebnis(se)", "le résultat"],
+            ["die Leistung(en)", "la performance"],
+            ["das Hochschulwesen", "l'enseignement supérieur"],
+            ["die Universität(en)", "l'université"],
+            ["die technische Universität", "l'université technique"],
+            ["die pädagogische Hochschule", "l'école supérieur de pédagogie"],
+            ["die Kunsthochschule(n)", "l'école supérieur des beaux-arts"],
+            ["die Musikhochschule(n)", "l'école supérieur de musique"],
+            ["die Fachhochschule(n)", "l'école supérieur de technologie"],
+            ["der Student(en)", "l'étudiant"],
+            ["die Studentin(nen)", "l'étudiante"],
+            ["der Studierende(n)", "l'étudiant"],
+            ["die Studierende(n)", "l'étudiante"],
+            ["ein Studium absolvieren", "faire des études supérieures"],
+            ["Ingenieurwissenschaften studieren", "faire des études supérieures en sciences de l'ingénieure"],
+            ["die Auswahl", "la sélection"],
+            ["das Auswahlverfahren", "la procédure de sélection"],
+            ["die Zulassung", "l'admission"],
+            ["die Einschreibung", "l'inscription"],
+            ["sich einschreiben", "s'inscrire"],
+            ["sich rückmelden", "se réinscrire"],
+            ["das Stipendium(ien)", "la bourse (d'études)"],
+            ["der Unterricht", "les cours"],
+            ["die Vorlesung(en)", "le cours magistral"],
+            ["die Lehrveranstaltung(en)", "le cours, TD, UV"],
+            ["eine Veranstaltung belegen", "s'inscrire à un cours"],
+            ["den Unterricht besuchen", "suivre un/les cours"],
+            ["die Übung(en)", "le travail pratique"],
+            ["das Referat(e)", "l'exposé"],
+            ["ein Referat halten", "faire un exposé"],
+            ["die Klausur(en)", "le partiel"],
+            ["eine Prüfung bestehen", "êter admis à un examen"],
+            ["das Vordiplom", "le diplôme de fin de tronc commun"],
+            ["das Grundstudium", "le tronc commun"],
+            ["das Haupstudium", "les études en branche"],
+            ["die Fachrichtung", "la branche"],
+            ["der Fachbereich", "le domaine de spécialité"],
+            ["das Studienfach(¨-er)", "la discipline"],
+            ["das Pflichtfach(¨-er)", "la matière obligatoire"],
+            ["das Wahlfach(¨-er)", "la matière optionnelle"],
+            ["der Bachelor(studiengang)", "la licence"],
+            ["der Magister(studiengang)", "le master"],
+            ["die Doktorarbeit", "la thèse"],
+            ["die Promotionsarbeit", "la thèse"],
+            ["an einer Doktorarbait schreiben", "écrire une thèse"],
+            ["die Habilitationsschrift(en)", "la thèse d'état"],
+            ["promovieren", "soutenir une thèse"]
+        ];
+        const trashBin = [];
+        var current, timeoutFunction;
+
+        function Question() {
+            this[2] = Math.floor(Math.random() * questions.length);
+            const n = this.n = Math.ceil(Math.random() * 2) % 2;
+            var ques = questions[this[2]][(n + 1) % 2];
+            if (Array.isArray(ques)) {
+                ques = ques[Math.floor(Math.random() * ques.length)];
+            };
+            this[0] = `${['Traduire ', ''][n]}<b>${ques}</b> ${['en allemand', 'ins Französische übersetzen'][n]}.`;
+            this[1] = questions[this[2]][n];
+            this.remove = function () {
+                trashBin.push(questions.splice(this[2], 1));
+            };
+        };
+        function init() {
+            current = new Question();
+            question = current[0];
+            usercolor = 'black';
+            userresult = '';
+            result = '';
+            timeoutFunction && clearTimeout(timeoutFunction);
+        };
+        init();
+        function end() {
+            result = current[1].join?.(', ') || current[1];
+            timeoutFunction && clearTimeout(timeoutFunction);
+            timeoutFunction = setTimeout(init, 5e3);
+        };
+        const right = (input, checkWith) => Array.isArray(checkWith) ? checkWith.includes(input) : input === checkWith;
+        tryEl.onclick = tryFunc = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]) && (end(), 1))];
+        };
+        checkEl.onclick = check = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]))];
+            end();
+        };
+        resolveEl.onclick = resolve = function () {
+            result = current[1];
+            end();
+        };
+        trashEl.onclick = trash = function () {
+            current.remove();
+            init();
+        };
+        onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                tryFunc();
+            };
+        };
+    </script>
+</body>
+
+</html>
