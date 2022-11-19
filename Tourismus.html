@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        textarea {
+            width: 100%;
+            outline: none !important;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        #buttonwrapper {
+            width: 100%;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="question"></div>
+        <textarea placeholder="write here..."></textarea>
+        <div id="buttonwrapper">
+            <button>try</button>
+            <button>check</button>
+            <button>resolve</button>
+            <button>trash</button>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const questiondiv = $('#question'), resultdiv = $('#result'), userdiv = $('textarea'), [tryEl, checkEl, resolveEl, trashEl] = $('#buttonwrapper').children;
+        Object.defineProperties(this, {
+            userresult: { get: function () { return userdiv.value }, set: function (s) { userdiv.value = s } },
+            question: { set: function (s) { questiondiv.innerHTML = s } },
+            result: { set: function (s) { resultdiv.innerHTML = s } },
+            usercolor: { set: function (s) { userdiv.style.borderColor = s } },
+        });
+        const questions = [
+            ["die Tourismusbranche", "l'industrie du tourisme"],
+            ["der Reiseveranstalter(-)", "le tour-opérateur"],
+            ["das Reisebüro(-s)", "l'agence de voyage"],
+            ["die Broschüre(-n)", "la brochure"],
+            ["der Prospekt(-e)", "le prospectus"],
+            ["die Buchung(-en)", "la réservation"],
+            ["der Ökotourismus", "l'écotourisme"],
+            ["die Hochsaison", "la saison pleine"],
+            ["die Nebensaison", "la saison creuse"],
+            ["die Pauschalreise", "le voyage à forfait"],
+            ["die Gruppenreise", ["le voyage de groupe, voyage organisé"]],
+            ["die Rechnung(-en)", ["la facture, la note"]],
+            ["die Vorbereitungen", "les préparatifs"],
+            [["die Ferien", "der Urlaud"], ["les vacances", "le congé"]],
+            [["der Urlauber", "die Urlauberin"], ["le vacancier", "la vacancière"]],
+            ["Urlaub machen", "partir en vacances"],
+            ["die Studienreise(-n)", "le voyage d'études"],
+            ["die Geschäftsreise", "le voyage d'affaires"], 
+            ["die Vergnügungsreise", "le voyage d'agrément"],
+            ["die Hochzeitsreise", "le voyage de noces"], 
+            ["das Reisevorhaben", "le projet de voyage"], 
+            ["der Aufenthalt", "le séjour"], 
+            ["sich über etwas erkundigen", "se renseigner sur quelque chose"], 
+            ["sich informieren über etwas", "s'informer sur quelque chose"], 
+            ["jemandem etwas empfehlen", "recommander quelque chose à quelqu'un"],
+            ["die Reiseunterlagen", "les documents de voyage"], 
+            ["der Ausweis(-e)", "une pièce d'identité"], 
+            ["gültig", "valable"], 
+            ["abgelaufen", "périmé"], 
+            ["das Visum", "le visa"], 
+            ["etwas anmelden", "déclarer quelque chose"],
+            ["etwas buchen", "réserver quelque chose"], 
+            ["etwas bestätigen", "confirmer quelque chose"], 
+            ["die Bestätigung(-en)", "la confirmation"], 
+            ["stornieren", "annuler"], 
+            ["das Handgepäck(-e)", "le sac à main"], 
+            ["das Gepäck(-e)", "le bagage"], 
+            ["der Schalter", "le guichet"], 
+            ["die Reise(-n)", "le voyage"], 
+            ["die Anreise", "l'arrivée"], 
+            ["die Abreise", "le départ"],
+            ["reisen", "voyager"], 
+            ["abreisen", "partir en voyage"], 
+            ["verreisen", "partir en voyage"], 
+            ["das Reiseziel", "la destination"], 
+            ["der Hinfahrt(-en)", "l'aller"], 
+            ["der Rückfahrt(-en)", "le retour"], 
+            ["Hin-und Rückfahrkarte(-n)", "le billet aller-retour"], 
+            ["der Fahrgast(¨-e)", "le passager (train ou voiture)"], 
+            ["der Fluggast(¨-e)", "le passager (avion)"], 
+            ["der Zug(¨-e)", "le train"], 
+            ["der Schnellzug", "le train à grande vitesse"], 
+            ["der Eilzug", "le train direct"], 
+            ["den Zug verpassen", "rater le train"], 
+            ["der Wagen(-)", "le wagon"], 
+            ["das Abteil(-e)", "le compartiment"], 
+            ["der Anschlusszug", "la correspondance"], 
+            ["das Fahrschiff(-e)", "le ferry"], 
+            ["die Kreuzfahrt(-en)", "la croisière"], 
+            ["an Bord gehen", ["s'embarquer", "monter à bord"]], 
+            ["an Land gehen", ["débarquer", "faire escale"]], 
+            ["der Reisebus(-se)", "le car"], 
+            ["der Flug(¨-e)", "le vol"], 
+            ["der Start", "le décollage"], 
+            ["die Landung", "l'atterrissage"], 
+            ["landen", "atterrir"], 
+            ["das Auto(-s)", "la voiture"], 
+            ["der Fahrplan(¨-e)", "l'horaire"], 
+            ["die Unterkunft(¨-e)", "le logement"], 
+            ["zelten", "faire du camping"], 
+            ["das Zelt aufschlagen", "monter la tente"], 
+            ["der Wohnwagen(-)", "la caravane"], 
+            ["das Wohnmobil(-e)", "le camping-car"], 
+            ["die Selbstbedienung(-en)", "le libre service"], 
+            ["ausgebucht", "complet"],
+            ["die Jugendherberge(-n)", "l'auberge de jeunesse"],
+            ["das Hotel(-s)", "l'hôtel"],
+            ["Hotel mit Restaurantbetrieb", "hôtel-restaurant"], 
+            ["das Restaurant(-s)", "le restaurant"], 
+            ["das Gästezimmer(-)", "la chambre d'hôte"], 
+            ["das Einzelzimmer(-)", "la chambre simple"], 
+            ["das Doppelzimmer(-)", "la chambre double"], 
+            ["das Zusatzbett(-en)", "le lit supplémentaire"], 
+            ["die Ferienwohnung(-en)", ["la location", "appartement de vacances"]], 
+            ["das Ferienhaus(¨-e)", "la maison de vacances"], 
+            [["das Landhaus(¨-e)","die Hütte(-n)"], ["le chalet", "l'auberge"]], 
+            ["die Halbpension", "la demi-pension"], 
+            ["die Vollpension", "la pension complète"], 
+            ["das Eintrittsgeld", "le prix d'entrée"], 
+            ["die Führung(-en)", "la visite guidée"], 
+            ["die Öffnungszeiten", "les heures d'ouverture"], 
+            ["die Attraktion(-en)", "l'attraction"], 
+            ["der Ausflug(¨-e)", "l'excursion"], 
+            ["die Sehenswürdigkeit(-en)", "la curiosité touristique"], 
+            ["sehenswert", ["à voir", "qui en vaut la peine"]], 
+            ["das Schloss(de Schlösser)", "le château"], 
+            ["das Museum(die Museen)", "le musée"], 
+            ["das Gebäude(-n)", "le bâtiment"],
+             ["das Denkmal(-e)", "le monument"], 
+            ["das Bauwerk(-e)", "l'oeuvre architecturale"], 
+            ["die Kirche(-n)", "l'église"], 
+            ["der Tempel(-)", "le temple"], 
+            ["die Festung(-en)", "la forteresse"], 
+            ["die Ruinen", "les ruines"], 
+            ["das Theater(-)", "le théâtre"], 
+            ["der Nationalpark", "le parc national"], 
+            ["das Naturschutzgebiet(-e)", "le parc naturel, protégé"], 
+            ["wandern", "faire une randonnée"], 
+            ["eine Radtour machen", "faire une randonnée à vélo"], 
+            ["die Wanderung(-en)", "la randonnée"], 
+            ["Sport machen", "faire du sport"], 
+            ["klettern", "faire de l'escalade"], 
+            ["schwimmen", "nager"], 
+            ["baden", "se baigner"], 
+            ["sich entspannen", "se détendre"], 
+            ["sich ausruhen", "se reposer"], 
+            ["der Urlaubsort(-e)", "la station touristique"], 
+            ["das Touristengebiet(-e)", "la région touristique"], 
+            ["die Atmosphäre", "l'atmosphère"], 
+            ["die Landschaft(-en)", "le paysage"], 
+            ["der Thermalkurort(-e)", "la station thermale"], 
+            ["der Badeort(-e)", "la station balnéaire"], 
+            ["der Wintersportort(-e)", "la station de sports d'hiver"], 
+            ["der Berg(-e)", "la montagne"], 
+            ["der See(-n)", "le lac"], 
+            ["das Meer(-e)", "la mer"],
+            ["der Strand(-e)", "la plage"], 
+            ["die Küste(-n)", "la côte"], 
+            ["die Insel(-n)", "l'île"], 
+            ["die Sonne(-n)", "le soleil"], 
+            ["die Sonnencreme", "la crème solaire"], 
+            ["der Aussichtspunkt(-e)", "le point de vue"], 
+            ["im Freien", "en plein air"], 
+            ["die frische Luft", ["le grand air", "l'air pur"]],
+            ["das Erlebnis(-se)", ["l'expérience", "la chose vécue"]], 
+            ["fremd", "étranger"], 
+            ["die Tradition(-en)", "la tradition"],
+            ["die Folklore", "le folklore"],
+            ["die authentische Küche", "la cuisine authentique"], 
+            ["die Erinnerung(-en)", "le souvenir"], 
+            ["der Souvenirladen(-)", "la boutique souvenir"], 
+            ["das Abenteuer(-)", "l'aventure"], 
+            ["der Lieblingsort(-e)", "l'endroit favori"], 
+            ["die Zeit genießen", ["passer du bon temps", "profiter"]]
+        ];
+        const trashBin = [];
+        var current, timeoutFunction;
+
+        function Question() {
+            this[2] = Math.floor(Math.random() * questions.length);
+            const n = this.n = Math.ceil(Math.random() * 2) % 2;
+            var ques = questions[this[2]][(n + 1) % 2];
+            if (Array.isArray(ques)) {
+                ques = ques[Math.floor(Math.random() * ques.length)];
+            };
+            this[0] = `${['Traduire ', ''][n]}<b>${ques}</b> ${['en allemand', 'ins Französische übersetzen'][n]}.`;
+            this[1] = questions[this[2]][n];
+            this.remove = function () {
+                trashBin.push(questions.splice(this[2], 1));
+            };
+        };
+        function init() {
+            current = new Question();
+            question = current[0];
+            usercolor = 'black';
+            userresult = '';
+            result = '';
+            timeoutFunction && clearTimeout(timeoutFunction);
+        };
+        init();
+        function end() {
+            result = current[1].join?.(', ') || current[1];
+            timeoutFunction && clearTimeout(timeoutFunction);
+            timeoutFunction = setTimeout(init, 5e3);
+        };
+        const right = (input, checkWith) => Array.isArray(checkWith) ? checkWith.includes(input) : input === checkWith;
+        tryEl.onclick = tryFunc = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]) && (end(), 1))];
+        };
+        checkEl.onclick = check = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]))];
+            end();
+        };
+        resolveEl.onclick = resolve = function () {
+            result = current[1];
+            end();
+        };
+        trashEl.onclick = trash = function () {
+            current.remove();
+            init();
+        };
+        onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                tryFunc();
+            };
+        };
+    </script>
+</body>
+
+</html>
