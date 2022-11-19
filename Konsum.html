@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        textarea {
+            width: 100%;
+            outline: none !important;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        #buttonwrapper {
+            width: 100%;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="question"></div>
+        <textarea placeholder="write here..."></textarea>
+        <div id="buttonwrapper">
+            <button>try</button>
+            <button>check</button>
+            <button>resolve</button>
+            <button>trash</button>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const questiondiv = $('#question'), resultdiv = $('#result'), userdiv = $('textarea'), [tryEl, checkEl, resolveEl, trashEl] = $('#buttonwrapper').children;
+        Object.defineProperties(this, {
+            userresult: { get: function () { return userdiv.value }, set: function (s) { userdiv.value = s } },
+            question: { set: function (s) { questiondiv.innerHTML = s } },
+            result: { set: function (s) { resultdiv.innerHTML = s } },
+            usercolor: { set: function (s) { userdiv.style.borderColor = s } },
+        });
+        const questions = [
+            ["der Konsum", "la consommation"],
+            ["konsumieren (hat konsumiert)", "consommer"],
+            [["der Konsument", "der Verbraucher"], "le consommateur"],
+            [["die Konsumgesellschaft", "die Überflussgesellschaft"], "la société de consommation"],
+            ["das Geld", "l'argent"],
+            ["die Währung", "la monnaie"],
+            ["das Geschäft(-e)", ["le magasin", "l'affaire"]],
+            ["der Umsatz", "le chiffre d'affaires"],
+            ["das Produkt", "le produit"],
+            ["kaufen (hat gekauft)", "acheter"],
+            ["der Käufer", "l'acheteur"],
+            ["der Kauf", "l'achat"],
+            ["verkaufen (hat verkauft)", "vendre"],
+            ["der Verkäufer", "le vendeur"],
+            ["der Verkauf", "la vente"],
+            ["die Werbung", "la publicité"],
+            ["der Händler(-)", "le commerçant"],
+            ["die Nachfrage nach +D", "la demande"],
+            ["der Kunde(-n)", "le client"],
+            ["die Kundschaft", "la clientèle"],
+            ["der Supermarkt", "le supermarché"],
+            ["senken", "baisser"],
+            [["steigen","erhöhen"], "augmenter"],
+            ["die Bestellung", "la commande"],
+            ["die Kaufkraft", "le pouvoir d'achat"],
+            ["geld ausgeben", "dépenser de l'argent"],
+            ["der Luxus", "le luxe"],
+            ["teuer", "cher"],
+            ["billig", "bon marché"],
+            ["die Konsumgewohnheiten", "les habitudes de consommation"],
+            [["die Schuld", "die Verschuldung"], "la dette"],
+            ["der Wohlstand", "la prospérité"],
+            ["der Online-Handel", "le commerce en ligne"]
+        ];
+        const trashBin = [];
+        var current, timeoutFunction;
+
+        function Question() {
+            this[2] = Math.floor(Math.random() * questions.length);
+            const n = this.n = Math.ceil(Math.random() * 2) % 2;
+            var ques = questions[this[2]][(n + 1) % 2];
+            if (Array.isArray(ques)) {
+                ques = ques[Math.floor(Math.random() * ques.length)];
+            };
+            this[0] = `${['Traduire ', ''][n]}<b>${ques}</b> ${['en allemand', 'ins Französische übersetzen'][n]}.`;
+            this[1] = questions[this[2]][n];
+            this.remove = function () {
+                trashBin.push(questions.splice(this[2], 1));
+            };
+        };
+        function init() {
+            current = new Question();
+            question = current[0];
+            usercolor = 'black';
+            userresult = '';
+            result = '';
+            timeoutFunction && clearTimeout(timeoutFunction);
+        };
+        init();
+        function end() {
+            result = current[1].join?.(', ') || current[1];
+            timeoutFunction && clearTimeout(timeoutFunction);
+            timeoutFunction = setTimeout(init, 5e3);
+        };
+        const right = (input, checkWith) => Array.isArray(checkWith) ? checkWith.includes(input) : input === checkWith;
+        tryEl.onclick = tryFunc = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]) && (end(), 1))];
+        };
+        checkEl.onclick = check = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult, current[1]))];
+            end();
+        };
+        resolveEl.onclick = resolve = function () {
+            result = current[1];
+            end();
+        };
+        trashEl.onclick = trash = function () {
+            current.remove();
+            init();
+        };
+        onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                tryFunc();
+            };
+        };
+    </script>
+</body>
+
+</html>
