@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        textarea {
+            width: 100%;
+            outline: none !important;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        #buttonwrapper {
+            width: 100%;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="question"></div>
+        <ul></ul>
+        <textarea placeholder="write here..."></textarea>
+        <div id="buttonwrapper">
+            <button>try</button>
+            <button>check</button>
+            <button>resolve</button>
+            <button>trash</button>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const questiondiv = $('#question'), resultdiv = $('#result'), userdiv = $('textarea'), [tryEl, checkEl, resolveEl, trashEl] = $('#buttonwrapper').children, list = $('ul');;
+        Object.defineProperties(this, {
+            userresult: { get: function () { return userdiv.value }, set: function (s) { userdiv.value = s } },
+            question: { set: function (s) { questiondiv.innerHTML = s } },
+            result: { set: function (s) { resultdiv.innerHTML = s } },
+            usercolor: { set: function (s) { userdiv.style.borderColor = s } },
+        });
+        Object.defineProperties(Array.prototype, {
+            random: { get: function () { return this[Math.floor(Math.random() * this.length)] } }
+        });
+        list.add = str => {
+            list.insertAdjacentHTML('beforeend', `<li>${str}</li>`)
+        }
+
+        const duplicate = e => typeof e == 'string' ? e : (console.log(e), [...e]);
+        const data = [
+            ["fallen", "fiel", "gefallen", "fällt", "tomber"],
+            ["fangen", "fing", "gefangen", "fängt", ["attraper", "capturer"]],
+            ["halten", "hielt", "gehalten", "hält", ["tenir", "s'arrêter"]],
+            ["hängen", "hing", "gehangen", "hängt", "être suspendu"],
+            ["lassen", "lieB", "gelassen", "lässt", "laisser"],
+            ["laufen", "lief", "gelaufen", "läuft", "courir"],
+            ["raten", "riet", "geraten", "rät", ["conseiller", "deviner"]],
+            ["schlafen", "schlief", "geschlafen", "schläft", "dormir"],
+            ["backen", "backte", "gebacken", "bäckt", "cuire"],
+            ["fahren", "fuhr", "gefahren", "fährt", "aller (en véhicule)"],
+            ["graben", "grub", "gegraben", "gräbt", "creuser"],
+            ["laden", "lud", "geladen", "lädt", "charger"],
+            ["schaffen", "schuf", "geschaffen", "schafft", "créer"],
+            ["schlagen", "schlug", "geschlagen", "schlägt", "frapper"],
+            ["tragen", "trug", "getragen", "trägt", "porter"],
+            ["wachsen", "wuchs", "gewachsen", "wächst", "grandir"],
+            ["waschen", "wusch", "gewaschen", "wäscht", "laver"],
+            ["essen", "aB", "gegessen", "isst", "manger"],
+            ["fressen", "fraB", "gefressen", "frisst", "manger (animaux)"],
+            ["geben", "gab", "gegeben", "gibt", "donner"],
+            ["geschehen", "geschah", "geschehen", "geschieht", "se produire"],
+            ["lesen", "las", "gelesen", "liest", "lire"],
+            ["messen", "maB", "gemessen", "misst", "mesurer"],
+            ["sehen", "sah", "gesehen", "sieht", "voir"],
+            ["treten", "trat", "getreten", "tritt", "marcher"],
+            ["vergessen", "vergaB", "vergessen", "vergisst", "oublier"],
+            ["brechen", "brach", "gebrochen", "bricht", "briser"],
+            ["gelten", "galt", "gegolten", "gilt", "valoir"],
+            ["helfen", "half", "geholfen", "hilft", "aider"],
+            ["nehmen", "nahm", "genommen", "nimmt", "prendre"],
+            ["sprechen", "sprach", "gesprochen", "spricht", "parler"],
+            ["sterben", "starb", "gestorben", "stirbt", "mourir"],
+            ["treffen", "traf", "getroffen", "trifft", ["atteindre", "rencontrer"]],
+            ["werben", "warb", "geworben", "wirbt", "faire de la publicité"],
+            ["werfen", "warf", "geworfen", "wirft", "lancer"],
+            ["heben", "hob", "gehoben", "hebt", "soulever"],
+            ["gleichen", "glich", "geglichen", "gleicht", "ressembler"],
+            ["greifen", "griff", "gegriffen", "greift", "saisir"],
+            ["pfeifen", "pfiff", "gepfiffen", "pfeift", "siffler"],
+            ["reiBen", "riss", "gerissen", "reiBt", "arracher"],
+            ["reiten", "ritt", "geritten", "reitet", "faire du cheval"],
+            ["schmeiBen", "schmiss", "geschmissen", "schmeiBt", "jeter"],
+            ["schreiten", "schritt", "geschritten", "schreitet", "marcher2"],
+            ["streiten", "stritt", "gestritten", "streitet", "disputer"],
+            ["weichen", "wich", "gewichen", "weicht", "céder"],
+        ];
+
+        const Transform = [
+            {},
+            {}
+        ];
+
+        for (let i of data) {
+            Transform[0][i[0]] = i[4];
+            if (typeof i[4] == 'string') Transform[1][i[4]] = [i[0], i[3], i[2], i[1]];
+            else i[4].forEach(e => Transform[1][e] = [i[0], i[3], i[2], i[1]])
+        }
+
+        var current, timeoutFunction;
+
+        function Question() {
+            this.n = Math.floor(Math.random() * 2);
+            if (Object.keys(Transform[this.n]).length === 0) this.n = 1 - this.n
+            var l = Transform[this.n];
+            if (Object.keys(l).length === 0) return alert("All words have been trashed.\nReload page to restart.")
+            this.word = Object.keys(l).random;
+            this.result = duplicate(l[this.word]);
+            this.nli = typeof this.result == 'string';
+            this.str = `${['Translate', 'Traduire'][this.n]} <b>${this.word}</b> ${['in French', 'en anglais'][this.n]}.`;
+            this.remove = function () { delete Transform[this.n][this.word] };
+        };
+        function init() {
+            list.innerHTML = '';
+            current = new Question();
+            question = current.str;
+            usercolor = 'black';
+            userresult = '';
+            result = '';
+            timeoutFunction && clearTimeout(timeoutFunction);
+        };
+        init();
+        function end() {
+            result = current.result.join?.(', ') || current.result;
+            timeoutFunction && clearTimeout(timeoutFunction);
+            timeoutFunction = setTimeout(init, 3e3);
+        };
+        const right = inp => current.nli ? inp === current.result : current.result.includes(inp);
+        tryEl.onclick = tryFunc = function () {
+            if (current.nli) {
+                usercolor = ['#f00', '#0f0'][Number(userresult === current.result && (end(), 1))];
+            } else {
+                if (current.result.includes(userresult)) {
+                    const n = current.result.indexOf(userresult)
+                    list.add(userresult + '&nbsp;&nbsp;&nbsp;' + (n + 1));
+                    delete current.result[n];
+                    userdiv.value = '';
+                    usercolor = '#000'
+                    if (current.result.filter(e => e).length === 0) {
+                        usercolor = '#0f0'
+                        end();
+                    }
+                } else usercolor = '#f00'
+            }
+        };
+        checkEl.onclick = check = function () {
+            usercolor = ['#f00', '#0f0'][Number(right(userresult))];
+            end();
+        };
+        resolveEl.onclick = end;
+        trashEl.onclick = trash = function () {
+            current.remove();
+            init();
+        };
+        onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (e.ctrlKey) check();
+                else tryFunc();
+            };
+            if (e.ctrlKey && e.key === 'x') {
+                e.preventDefault();
+                trash();
+            };
+        };
+    </script>
+</body>
+
+</html>
